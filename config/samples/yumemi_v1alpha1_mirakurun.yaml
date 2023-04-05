@@ -1,0 +1,12 @@
+apiVersion: yumemi.sinoa.jp/v1alpha1
+kind: Mirakurun
+metadata:
+  labels:
+    app.kubernetes.io/name: mirakurun
+    app.kubernetes.io/instance: mirakurun-sample
+    app.kubernetes.io/part-of: yumemi
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: yumemi
+  name: mirakurun-sample
+spec:
+  # TODO(user): Add fields here
