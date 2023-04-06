@@ -58,11 +58,6 @@ spec:
                       type: string
                     name:
                       type: string
-                    satellite:
-                      type: string
-                    serviceID:
-                      format: int64
-                      type: integer
                     type:
                       type: string
                   required:

@@ -38,15 +38,13 @@ type Channel struct {
 	DisplayName string `json:"displayName,omitempty"`
 	Type        string `json:"type"`
 	Channel     string `json:"channel"`
-	ServiceID   uint64 `json:"serviceID,omitempty"`
-	Satellite   string `json:"satellite,omitempty"`
 }
 
 // MirakurunStatus defines the observed state of Mirakurun
 type MirakurunStatus struct {
-	Tuners          []Tuner     `json:"tuners,omitempty"`
-	Channels        []Channel   `json:"channels,omitempty"`
-	LastUpdatedTime metav1.Time `json:"lastUpdatedTime,omitempty"`
+	Tuners          []Tuner      `json:"tuners,omitempty"`
+	Channels        []Channel    `json:"channels,omitempty"`
+	LastUpdatedTime *metav1.Time `json:"lastUpdatedTime,omitempty"`
 }
 
 //+kubebuilder:object:root=true

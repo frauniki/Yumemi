@@ -9,4 +9,4 @@ metadata:
     app.kubernetes.io/created-by: yumemi
   name: mirakurun-sample
 spec:
-  # TODO(user): Add fields here
+  endpoint: http://10.2.0.68:40772/api/
