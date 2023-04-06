@@ -68,6 +68,10 @@ spec:
               lastUpdatedTime:
                 format: date-time
                 type: string
+              message:
+                type: string
+              reason:
+                type: string
               tuners:
                 items:
                   properties:

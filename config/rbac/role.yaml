@@ -31,3 +31,29 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - yumemi.sinoa.jp
+  resources:
+  - records
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - yumemi.sinoa.jp
+  resources:
+  - records/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - yumemi.sinoa.jp
+  resources:
+  - records/status
+  verbs:
+  - get
+  - patch
+  - update

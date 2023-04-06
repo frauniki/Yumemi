@@ -47,9 +47,10 @@ func (r *MirakurunReconciler) getMirakurunService(s scope.MirakurunScope) servic
 	return mirakurun.NewService(s)
 }
 
-// +kubebuilder:rbac:groups=yumemi.sinoa.jp,resources=mirakuruns,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=yumemi.sinoa.jp,resources=mirakuruns/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=yumemi.sinoa.jp,resources=mirakuruns/finalizers,verbs=update
+//+kubebuilder:rbac:groups=yumemi.sinoa.jp,resources=mirakuruns,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=yumemi.sinoa.jp,resources=mirakuruns/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=yumemi.sinoa.jp,resources=mirakuruns/finalizers,verbs=update
+
 func (r *MirakurunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	_ = log.FromContext(ctx)
 

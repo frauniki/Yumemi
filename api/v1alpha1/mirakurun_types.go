@@ -45,6 +45,8 @@ type MirakurunStatus struct {
 	Tuners          []Tuner      `json:"tuners,omitempty"`
 	Channels        []Channel    `json:"channels,omitempty"`
 	LastUpdatedTime *metav1.Time `json:"lastUpdatedTime,omitempty"`
+	Reason          string       `json:"reason,omitempty"`
+	Message         string       `json:"message,omitempty"`
 }
 
 //+kubebuilder:object:root=true

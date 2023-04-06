@@ -1,0 +1,12 @@
+apiVersion: yumemi.sinoa.jp/v1alpha1
+kind: Record
+metadata:
+  labels:
+    app.kubernetes.io/name: record
+    app.kubernetes.io/instance: record-sample
+    app.kubernetes.io/part-of: yumemi
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: yumemi
+  name: record-sample
+spec:
+  # TODO(user): Add fields here

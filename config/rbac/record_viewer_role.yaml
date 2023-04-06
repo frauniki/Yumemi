@@ -1,0 +1,27 @@
+# permissions for end users to view records.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: record-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: yumemi
+    app.kubernetes.io/part-of: yumemi
+    app.kubernetes.io/managed-by: kustomize
+  name: record-viewer-role
+rules:
+- apiGroups:
+  - yumemi.sinoa.jp
+  resources:
+  - records
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - yumemi.sinoa.jp
+  resources:
+  - records/status
+  verbs:
+  - get
