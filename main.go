@@ -24,47 +24,56 @@ import (
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
+	"k8s.io/component-base/logs"
+	v1 "k8s.io/component-base/logs/api/v1"
+	"k8s.io/klog/v2"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	"sigs.k8s.io/cluster-api/feature"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	yumemiv1alpha1 "github.com/frauniki/Yumemi/api/v1alpha1"
+	"github.com/frauniki/Yumemi/api/v1alpha1"
 	"github.com/frauniki/Yumemi/controllers"
+	"github.com/frauniki/Yumemi/pkg/logger"
+	"github.com/frauniki/Yumemi/pkg/scheduler"
+	"github.com/spf13/pflag"
 	//+kubebuilder:scaffold:imports
 )
 
 var (
 	scheme   = runtime.NewScheme()
 	setupLog = ctrl.Log.WithName("setup")
+
+	metricsAddr          string
+	enableLeaderElection bool
+	probeAddr            string
+	watchNamespaces      []string
+
+	logOptions = logs.NewOptions()
 )
 
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(yumemiv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(v1alpha1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
 func main() {
-	var metricsAddr string
-	var enableLeaderElection bool
-	var probeAddr string
-	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
-	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
-	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
-		"Enable leader election for controller manager. "+
-			"Enabling this will ensure there is only one active controller manager.")
-	opts := zap.Options{
-		Development: true,
-	}
-	opts.BindFlags(flag.CommandLine)
-	flag.Parse()
+	initFlags(pflag.CommandLine)
+	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
+	pflag.Parse()
 
-	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+	if err := v1.ValidateAndApply(logOptions, nil); err != nil {
+		setupLog.Error(err, "unable to validate and apply log options")
+		os.Exit(1)
+	}
+	ctrl.SetLogger(klog.Background())
+
+	ctx := ctrl.SetupSignalHandler()
 
 	syncPeriod := 1 * time.Hour
 
@@ -93,6 +102,15 @@ func main() {
 		os.Exit(1)
 	}
 
+	recordScheduler := scheduler.NewRecordScheduler(
+		logger.NewLogger(ctrl.Log.WithName("scheduler")),
+		10*time.Second, // TODO: set 1 minute
+		mgr.GetClient(),
+		watchNamespaces,
+	)
+	setupLog.Info("starting record scheduler")
+	recordScheduler.Start(ctx)
+
 	if err = (&controllers.MirakurunReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
@@ -119,8 +137,22 @@ func main() {
 	}
 
 	setupLog.Info("starting manager")
-	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
+	if err := mgr.Start(ctx); err != nil {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
+}
+
+func initFlags(fs *pflag.FlagSet) {
+	fs.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
+	fs.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
+	fs.BoolVar(&enableLeaderElection, "leader-elect", false,
+		"Enable leader election for controller manager. "+
+			"Enabling this will ensure there is only one active controller manager.")
+	fs.StringArrayVarP(&watchNamespaces, "namespaces", "n", []string{}, "Namespace that the controller watches to reconcile objects. If unspecified, the controller watches for objects across all namespaces.")
+
+	logs.AddFlags(fs, logs.SkipLoggingConfigurationFlags())
+	v1.AddFlags(logOptions, fs)
+
+	feature.MutableGates.AddFlag(fs)
 }

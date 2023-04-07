@@ -20,16 +20,30 @@ import (
 	"context"
 
 	"github.com/frauniki/Yumemi/api/v1alpha1"
+	"github.com/frauniki/Yumemi/pkg/logger"
+	"github.com/frauniki/Yumemi/pkg/scope"
+	"github.com/frauniki/Yumemi/pkg/services"
+	"github.com/frauniki/Yumemi/pkg/services/mirakurun"
+	"github.com/pkg/errors"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 // RecordReconciler reconciles a Record object
 type RecordReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
+
+	mirakurunServiceFactory func() services.MirakurunInterface
+}
+
+func (r *RecordReconciler) getMirakurunService() services.MirakurunInterface {
+	if r.mirakurunServiceFactory != nil {
+		return r.mirakurunServiceFactory()
+	}
+	return mirakurun.NewService()
 }
 
 //+kubebuilder:rbac:groups=yumemi.sinoa.jp,resources=records,verbs=get;list;watch;create;update;patch;delete
@@ -37,9 +51,58 @@ type RecordReconciler struct {
 //+kubebuilder:rbac:groups=yumemi.sinoa.jp,resources=records/finalizers,verbs=update
 
 func (r *RecordReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	log := logger.FromContext(ctx)
+
+	record := &v1alpha1.Record{}
+	if err := r.Get(ctx, req.NamespacedName, record); err != nil {
+		if apierrors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, err
+	}
+
+	recordScope, err := scope.NewRecordScope(scope.RecordScopeParams{
+		Logger: log,
+		Client: r.Client,
+		Record: record,
+	})
+	if err != nil {
+		return ctrl.Result{}, errors.Wrap(err, "failed to create record scope")
+	}
+
+	defer func() {
+		if err := recordScope.Close(); err != nil {
+			log.Error(err, "failed to close record scope")
+		}
+	}()
+
+	if !record.DeletionTimestamp.IsZero() {
+		return r.reconcileDelete(ctx, recordScope)
+	}
+
+	return r.reconcileNormal(ctx, recordScope)
+}
+
+func (r *RecordReconciler) reconcileDelete(ctx context.Context, s *scope.RecordScope) (ctrl.Result, error) {
+	return ctrl.Result{}, nil
+}
+
+func (r *RecordReconciler) reconcileNormal(ctx context.Context, s *scope.RecordScope) (ctrl.Result, error) {
+	// TODO: add finalizer
+
+	if err := r.reconcileRecord(ctx, s); err != nil {
+		return ctrl.Result{}, err
+	}
 
 	return ctrl.Result{}, nil
+}
+
+func (r *RecordReconciler) reconcileRecord(ctx context.Context, s *scope.RecordScope) error {
+	s.Logger.Info("Reconciling Record")
+
+	//mirakurunService := r.getMirakurunService()
+
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

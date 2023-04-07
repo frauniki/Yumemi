@@ -9,4 +9,13 @@ metadata:
     app.kubernetes.io/created-by: yumemi
   name: record-sample
 spec:
-  # TODO(user): Add fields here
+  recordName: test
+  endTime:
+    hours: 0
+    minutes: 0
+  channel:
+    channel: "21"
+    type: GR
+  saveSetting:
+    fileName: test
+    savePath: .

@@ -37,10 +37,17 @@ type RecordStatusPhase string
 // RecordSpec defines the desired state of Record
 type RecordSpec struct {
 	RecordName  string        `json:"recordName"`
-	StartTime   *metav1.Time  `json:"startTime,omitempty"`
-	EndTime     *metav1.Time  `json:"endTime"`
+	StartTime   RecordTime    `json:"startTime,omitempty"`
+	EndTime     RecordTime    `json:"endTime"`
 	Channel     RecordChannel `json:"channel"`
 	SaveSetting SaveSetting   `json:"saveSetting"`
+	//+kubebuilder:default=false
+	Suspend bool `json:"suspend"`
+}
+
+type RecordTime struct {
+	Hours   uint16 `json:"hours"`
+	Minutes uint16 `json:"minutes"`
 }
 
 type RecordChannel struct {

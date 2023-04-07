@@ -46,8 +46,15 @@ spec:
                 - type
                 type: object
               endTime:
-                format: date-time
-                type: string
+                properties:
+                  hours:
+                    type: integer
+                  minutes:
+                    type: integer
+                required:
+                - hours
+                - minutes
+                type: object
               recordName:
                 type: string
               saveSetting:
@@ -1647,13 +1654,24 @@ spec:
                 - savePath
                 type: object
               startTime:
-                format: date-time
-                type: string
+                properties:
+                  hours:
+                    type: integer
+                  minutes:
+                    type: integer
+                required:
+                - hours
+                - minutes
+                type: object
+              suspend:
+                default: false
+                type: boolean
             required:
             - channel
             - endTime
             - recordName
             - saveSetting
+            - suspend
             type: object
           status:
             description: RecordStatus defines the observed state of Record
