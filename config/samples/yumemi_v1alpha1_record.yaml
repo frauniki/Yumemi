@@ -11,6 +11,9 @@ metadata:
 spec:
   recordName: test
   endTime:
+    years: 2023
+    months: 1
+    days: 1
     hours: 0
     minutes: 0
   channel:

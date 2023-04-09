@@ -21,6 +21,7 @@ import (
 
 	"github.com/frauniki/Yumemi/api/v1alpha1"
 	"github.com/frauniki/Yumemi/pkg/logger"
+	"github.com/frauniki/Yumemi/pkg/scheduler"
 	"github.com/frauniki/Yumemi/pkg/scope"
 	"github.com/frauniki/Yumemi/pkg/services"
 	"github.com/frauniki/Yumemi/pkg/services/mirakurun"
@@ -90,19 +91,11 @@ func (r *RecordReconciler) reconcileDelete(ctx context.Context, s *scope.RecordS
 func (r *RecordReconciler) reconcileNormal(ctx context.Context, s *scope.RecordScope) (ctrl.Result, error) {
 	// TODO: add finalizer
 
-	if err := r.reconcileRecord(ctx, s); err != nil {
+	if err := scheduler.ReconcileRecord(ctx, s); err != nil {
 		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
-}
-
-func (r *RecordReconciler) reconcileRecord(ctx context.Context, s *scope.RecordScope) error {
-	s.Logger.Info("Reconciling Record")
-
-	//mirakurunService := r.getMirakurunService()
-
-	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

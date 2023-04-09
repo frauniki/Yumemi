@@ -12,6 +12,8 @@ spec:
     kind: Record
     listKind: RecordList
     plural: records
+    shortNames:
+    - rc
     singular: record
   scope: Namespaced
   versions:
@@ -47,13 +49,32 @@ spec:
                 type: object
               endTime:
                 properties:
+                  days:
+                    maximum: 31
+                    minimum: 1
+                    type: integer
                   hours:
+                    maximum: 23
+                    minimum: 0
                     type: integer
                   minutes:
+                    maximum: 59
+                    minimum: 0
+                    type: integer
+                  months:
+                    maximum: 12
+                    minimum: 1
+                    type: integer
+                  years:
+                    maximum: 9999
+                    minimum: 1
                     type: integer
                 required:
+                - days
                 - hours
                 - minutes
+                - months
+                - years
                 type: object
               recordName:
                 type: string
@@ -1655,13 +1676,32 @@ spec:
                 type: object
               startTime:
                 properties:
+                  days:
+                    maximum: 31
+                    minimum: 1
+                    type: integer
                   hours:
+                    maximum: 23
+                    minimum: 0
                     type: integer
                   minutes:
+                    maximum: 59
+                    minimum: 0
+                    type: integer
+                  months:
+                    maximum: 12
+                    minimum: 1
+                    type: integer
+                  years:
+                    maximum: 9999
+                    minimum: 1
                     type: integer
                 required:
+                - days
                 - hours
                 - minutes
+                - months
+                - years
                 type: object
               suspend:
                 default: false
@@ -1679,7 +1719,6 @@ spec:
               message:
                 type: string
               phase:
-                default: Scheduled
                 enum:
                 - Scheduled
                 - Recording

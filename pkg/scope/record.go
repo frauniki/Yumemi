@@ -2,6 +2,8 @@ package scope
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/frauniki/Yumemi/api/v1alpha1"
 	"github.com/frauniki/Yumemi/pkg/logger"
@@ -56,6 +58,48 @@ func NewRecordScope(params RecordScopeParams) (*RecordScope, error) {
 
 func (s *RecordScope) Name() string {
 	return s.Record.Name
+}
+
+func (s *RecordScope) StartTime() (time.Time, error) {
+	startTime := s.Record.Spec.StartTime
+	if startTime == (v1alpha1.RecordTime{}) {
+		return time.Time{}, nil
+	}
+
+	t, err := time.Parse(time.RFC3339, fmt.Sprintf(
+		"%04d-%02d-%02dT%02d:%02d:%02d",
+		startTime.Years,
+		startTime.Months,
+		startTime.Days,
+		startTime.Hours,
+		startTime.Minutes,
+		0,
+	))
+	if err != nil {
+		return time.Time{}, errors.Wrap(err, "failed to parse start time")
+	}
+	return t, nil
+}
+
+func (s *RecordScope) EndTime() (time.Time, error) {
+	endTime := s.Record.Spec.EndTime
+	t, err := time.Parse(time.RFC3339, fmt.Sprintf(
+		"%04d-%02d-%02dT%02d:%02d:%02dZ",
+		endTime.Years,
+		endTime.Months,
+		endTime.Days,
+		endTime.Hours,
+		endTime.Minutes,
+		0,
+	))
+	if err != nil {
+		return time.Time{}, errors.Wrap(err, "failed to parse end time")
+	}
+	return t, nil
+}
+
+func (s *RecordScope) Phase() v1alpha1.RecordStatusPhase {
+	return s.Record.Status.Phase
 }
 
 func (s *RecordScope) PatchObject() error {

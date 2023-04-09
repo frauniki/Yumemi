@@ -1,6 +1,8 @@
 package scope
 
 import (
+	"time"
+
 	"github.com/frauniki/Yumemi/api/v1alpha1"
 	"github.com/frauniki/Yumemi/pkg/logger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -25,6 +27,9 @@ type RecordScoper interface {
 	logger.Wrapper
 
 	Name() string
+	StartTime() (time.Time, error)
+	EndTime() (time.Time, error)
+	Phase() v1alpha1.RecordStatusPhase
 
 	PatchObject() error
 	Close() error
